@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photo Frame Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #218838; --secondary: #dc3545; --bg: #f0f2f5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .container { background: #fff; width: 95%; max-width: 400px; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; }
+        .header { text-align: center; }
+        .header h2 { color: var(--secondary); font-size: 20px; }
+        .upload-box { border: 2px dashed var(--primary); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; background: #f8fff9; }
+        .canvas-area { width: 100%; aspect-ratio: 1/1; background: #eee; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
+        .controls { display: flex; flex-direction: column; gap: 5px; background: #fdfdfd; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
+        .control-row { display: flex; align-items: center; gap: 10px; }
+        .control-row label { font-size: 11px; font-weight: bold; width: 70px; }
+        input[type="range"] { flex: 1; accent-color: var(--primary); }
+        .btn-download { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>১২ই ফেব্রুয়ারি: ভোট দিন</h2>
+    </div>
+
+    <label for="imgUpload" class="upload-box">
+        <span>📸 আপনার ছবি সিলেক্ট করুন</span>
+        <input type="file" id="imgUpload" accept="image/*">
+    </label>
+
+    <div class="canvas-area">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="control-row"><label>🔍 জুম</label><input type="range" id="zoom" min="0.1" max="2.5" step="0.01" value="1"></div>
+        <div class="control-row"><label>↔️ ডানে-বামে</label><input type="range" id="posX" min="-250" max="750" step="1"></div>
+        <div class="control-row"><label>↕️ উপরে-নিচে</label><input type="range" id="posY" min="-250" max="750" step="1"></div>
+    </div>
+
+    <button class="btn-download" onclick="downloadImage()">⬇️ ডাউনলোড করুন</button>
+</div>
+
+<script>
+    const canvasArea = document.querySelector('.canvas-area');
+    const side = canvasArea.offsetWidth;
+    const canvas = new fabric.Canvas('canvas', { width: side, height: side, preserveObjectStacking: true });
+
+    let userImage = null;
+
+    // ১. ফ্রেম লোড করার ফাংশন
+    function initFrame() {
+        const frameUrl = 'image_d26985.png'; // আপনার ফাইলের নাম চেক করুন
+        fabric.Image.fromURL(frameUrl, function(img, isError) {
+            if (isError) {
+                console.error("Frame not found!");
+                alert("ফ্রেম ফাইলটি (image_d26985.png) খুঁজে পাওয়া যাচ্ছে না!");
+                return;
+            }
+            img.scaleToWidth(side);
+            img.set({ selectable: false, evented: false });
+            canvas.setOverlayImage(img, canvas.renderAll.bind(canvas));
+        }, { crossOrigin: 'anonymous' });
+    }
+    
+    initFrame();
+
+    // স্লাইডার এবং আপলোড হ্যান্ডলিং আগের মতোই
+    document.getElementById('imgUpload').onchange = function(e) {
+        const reader = new FileReader();
+        reader.onload = function(f) {
+            fabric.Image.fromURL(f.target.result, function(img) {
+                if (userImage) canvas.remove(userImage);
+                userImage = img;
+                img.scaleToWidth(side * 0.8);
+                img.set({ left: side/2, top: side/2, originX: 'center', originY: 'center' });
+                canvas.add(img);
+                canvas.sendToBack(img);
+                canvas.setActiveObject(img);
+            });
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    const z = document.getElementById('zoom'), x = document.getElementById('posX'), y = document.getElementById('posY');
+    [z, x, y].forEach(el => el.oninput = () => {
+        if(!userImage) return;
+        if(el.id === 'zoom') userImage.scale(parseFloat(z.value));
+        if(el.id === 'posX') userImage.set('left', parseFloat(x.value));
+        if(el.id === 'posY') userImage.set('top', parseFloat(y.value));
+        userImage.setCoords();
+        canvas.renderAll();
+    });
+
+    function downloadImage() {
+        if(!userImage) return alert("ছবি বাছুন");
+        const link = document.createElement('a');
+        link.download = 'framed_photo.png';
+        link.href = canvas.toDataURL({ format: 'png', multiplier: 2 });
+        link.click();
+    }
+</script>
+</body>
+</html>

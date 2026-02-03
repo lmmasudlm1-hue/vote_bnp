@@ -3,23 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Photo Frame Tool</title>
+    <title>BNP Photo Frame Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #218838; --secondary: #dc3545; --bg: #f0f2f5; }
+        :root { --primary: #28a745; --secondary: #dc3545; --bg: #f4f7f6; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .container { background: #fff; width: 95%; max-width: 400px; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; }
-        .header { text-align: center; }
-        .header h2 { color: var(--secondary); font-size: 20px; }
-        .upload-box { border: 2px dashed var(--primary); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; background: #f8fff9; }
-        .canvas-area { width: 100%; aspect-ratio: 1/1; background: #eee; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
-        .controls { display: flex; flex-direction: column; gap: 5px; background: #fdfdfd; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        
+        .container { background: #fff; width: 100%; max-width: 400px; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h2 { color: var(--secondary); font-size: 18px; margin-bottom: 3px; }
+        .header p { font-size: 11px; color: #666; font-weight: 600; }
+
+        /* ফ্রেম সিলেক্টর ফ্রেমের উপরে */
+        .frame-section { margin-bottom: 10px; text-align: center; }
+        .frame-label { font-size: 12px; font-weight: bold; margin-bottom: 5px; display: block; }
+        .frame-selector { display: flex; gap: 10px; justify-content: center; }
+        .frame-thumb { width: 50px; height: 50px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; overflow: hidden; transition: 0.3s; }
+        .frame-thumb.active { border-color: var(--primary); transform: scale(1.1); box-shadow: 0 0 8px rgba(40,167,69,0.3); }
+        .frame-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        .upload-box { border: 2px dashed var(--primary); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; background: #f8fff9; display: block; margin-bottom: 10px; }
+        .upload-box span { color: var(--primary); font-weight: bold; font-size: 14px; }
+        
+        .canvas-area { width: 100%; aspect-ratio: 1/1; background: #eee; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; position: relative; }
+        
+        /* সৌজন্যে ফ্রেমের নিচে */
+        .soujonne-box { text-align: center; margin: 8px 0; }
+        .soujonne { color: #0056b3; font-weight: bold; font-size: 15px; }
+
+        .controls { display: flex; flex-direction: column; gap: 8px; background: #f9f9f9; padding: 12px; border-radius: 10px; margin-bottom: 15px; }
         .control-row { display: flex; align-items: center; gap: 10px; }
-        .control-row label { font-size: 11px; font-weight: bold; width: 70px; }
+        .control-row label { font-size: 11px; width: 70px; font-weight: bold; }
         input[type="range"] { flex: 1; accent-color: var(--primary); }
-        .btn-download { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; }
+
+        .btn-download { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 17px; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-download:hover { background: #218838; }
         input[type="file"] { display: none; }
     </style>
 </head>
@@ -27,11 +48,24 @@
 
 <div class="container">
     <div class="header">
-        <h2>১২ই ফেব্রুয়ারি: ভোট দিন</h2>
+        <h2>১২ তারিখ সারা দিন, ধানের শিষে ভোট দিন</h2>
+        <p>বিএনপির সকল কর্মী এই ফ্রেমটি ব্যবহার ও শেয়ার করবেন</p>
+    </div>
+
+    <div class="frame-section">
+        <span class="frame-label">পছন্দের ফ্রেমটি বেছে নিন:</span>
+        <div class="frame-selector">
+            <div class="frame-thumb active" onclick="changeFrame('frame2.png', this)">
+                <img src="frame2.png" alt="Frame 2">
+            </div>
+            <div class="frame-thumb" onclick="changeFrame('image_d26985.png', this)">
+                <img src="image_d26985.png" alt="Frame 1">
+            </div>
+        </div>
     </div>
 
     <label for="imgUpload" class="upload-box">
-        <span>📸 আপনার ছবি সিলেক্ট করুন</span>
+        <span>📷 আপনার ছবি সিলেক্ট করুন</span>
         <input type="file" id="imgUpload" accept="image/*">
     </label>
 
@@ -39,40 +73,51 @@
         <canvas id="canvas"></canvas>
     </div>
 
-    <div class="controls">
-        <div class="control-row"><label>🔍 জুম</label><input type="range" id="zoom" min="0.1" max="2.5" step="0.01" value="1"></div>
-        <div class="control-row"><label>↔️ ডানে-বামে</label><input type="range" id="posX" min="-250" max="750" step="1"></div>
-        <div class="control-row"><label>↕️ উপরে-নিচে</label><input type="range" id="posY" min="-250" max="750" step="1"></div>
+    <div class="soujonne-box">
+        <span class="soujonne">সৌজন্যে: ইঞ্জিনিয়ার ওয়ায়েস কারনী</span>
     </div>
 
-    <button class="btn-download" onclick="downloadImage()">⬇️ ডাউনলোড করুন</button>
+    <div class="controls">
+        <div class="control-row"><label>🔍 জুম</label><input type="range" id="zoom" min="0.1" max="3" step="0.01" value="1"></div>
+        <div class="control-row"><label>↔️ ডানে-বামে</label><input type="range" id="posX" min="-500" max="1000" step="1"></div>
+        <div class="control-row"><label>↕️ উপরে-নিচে</label><input type="range" id="posY" min="-500" max="1000" step="1"></div>
+    </div>
+
+    <button class="btn-download" onclick="downloadImage()">⬇️ ডাউনলোড করে শেয়ার করুন</button>
 </div>
 
 <script>
     const canvasArea = document.querySelector('.canvas-area');
     const side = canvasArea.offsetWidth;
-    const canvas = new fabric.Canvas('canvas', { width: side, height: side, preserveObjectStacking: true });
+    const canvas = new fabric.Canvas('canvas', { 
+        width: side, 
+        height: side, 
+        preserveObjectStacking: true,
+        selection: false // গ্রুপ সিলেকশন বন্ধ
+    });
 
     let userImage = null;
+    let currentFrameImg = null;
 
-    // ১. ফ্রেম লোড করার ফাংশন
-    function initFrame() {
-        const frameUrl = 'image_d26985.png'; // আপনার ফাইলের নাম চেক করুন
-        fabric.Image.fromURL(frameUrl, function(img, isError) {
-            if (isError) {
-                console.error("Frame not found!");
-                alert("ফ্রেম ফাইলটি (image_d26985.png) খুঁজে পাওয়া যাচ্ছে না!");
-                return;
-            }
+    function loadFrame(url) {
+        fabric.Image.fromURL(url, function(img) {
+            if(currentFrameImg) canvas.remove(currentFrameImg);
             img.scaleToWidth(side);
             img.set({ selectable: false, evented: false });
             canvas.setOverlayImage(img, canvas.renderAll.bind(canvas));
+            currentFrameImg = img;
         }, { crossOrigin: 'anonymous' });
     }
-    
-    initFrame();
 
-    // স্লাইডার এবং আপলোড হ্যান্ডলিং আগের মতোই
+    // Default Frame
+    loadFrame('frame2.png');
+
+    function changeFrame(url, element) {
+        document.querySelectorAll('.frame-thumb').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        loadFrame(url);
+    }
+
     document.getElementById('imgUpload').onchange = function(e) {
         const reader = new FileReader();
         reader.onload = function(f) {
@@ -80,16 +125,36 @@
                 if (userImage) canvas.remove(userImage);
                 userImage = img;
                 img.scaleToWidth(side * 0.8);
-                img.set({ left: side/2, top: side/2, originX: 'center', originY: 'center' });
+                img.set({ 
+                    left: side/2, 
+                    top: side/2, 
+                    originX: 'center', 
+                    originY: 'center',
+                    cornerColor: 'white',
+                    cornerStrokeColor: '#28a745',
+                    transparentCorners: false,
+                    cornerSize: 8
+                });
                 canvas.add(img);
                 canvas.sendToBack(img);
                 canvas.setActiveObject(img);
+                updateSliders();
             });
         };
         reader.readAsDataURL(e.target.files[0]);
     };
 
+    // ছবির ওপর নাড়াচাড়া করলে স্লাইডার আপডেট হবে
+    canvas.on('object:moving', function() {
+        updateSliders();
+    });
+
+    canvas.on('object:scaling', function() {
+        updateSliders();
+    });
+
     const z = document.getElementById('zoom'), x = document.getElementById('posX'), y = document.getElementById('posY');
+    
     [z, x, y].forEach(el => el.oninput = () => {
         if(!userImage) return;
         if(el.id === 'zoom') userImage.scale(parseFloat(z.value));
@@ -99,10 +164,19 @@
         canvas.renderAll();
     });
 
+    function updateSliders() {
+        if(!userImage) return;
+        z.value = userImage.scaleX;
+        x.value = userImage.left;
+        y.value = userImage.top;
+    }
+
     function downloadImage() {
-        if(!userImage) return alert("ছবি বাছুন");
+        if(!userImage) return alert("আগে আপনার ছবি সিলেক্ট করুন");
+        canvas.discardActiveObject(); // সিলেকশন বর্ডার রিমুভ করে ডাউনলোড হবে
+        canvas.renderAll();
         const link = document.createElement('a');
-        link.download = 'framed_photo.png';
+        link.download = 'bnp_election_photo.png';
         link.href = canvas.toDataURL({ format: 'png', multiplier: 2 });
         link.click();
     }
